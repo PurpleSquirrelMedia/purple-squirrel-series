@@ -41,6 +41,9 @@
             <asset type="full">
                 <file_name>Purple_Squirrel_Nutshell.epub</file_name>
             </asset>
+            <asset type="cover">
+                <file_name>cover.jpg</file_name>
+            </asset>
         </assets>
 
         <territories>
