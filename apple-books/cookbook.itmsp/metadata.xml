@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://apple.com/itunes/importer" version="publication5.2">
+
+    <!-- REQUIRED: Replace with your Apple ID from App Store Connect -->
+    <provider>MatthewKarsten172794014891</provider>
+    <vendor_id>COOKBOOK_001</vendor_id>
+
+    <publication>
+        <!-- REQUIRED: Get this from App Store Connect after creating the book listing -->
+        <apple_id>YOUR_APPLE_ID_HERE</apple_id>
+
+        <metadata>
+            <title>Purple Squirrel Cookbook</title>
+            <subtitle>Solutions and Patterns for Every Problem</subtitle>
+            <publisher>Purple Squirrel Media</publisher>
+            <publication_date>2025-01-01</publication_date>
+            <language>en</language>
+
+            <description>
+                Problem to Solution. Recipes you can copy and adapt. Covers Claude/AI recipes including
+                structured output extraction, RAG implementation, and automated code review. Full-stack
+                recipes for authentication, WebSockets, file uploads, and payments. DevOps recipes for
+                Docker, CI/CD pipelines, monitoring, and database migrations.
+            </description>
+
+            <subjects>
+                <subject scheme="bisac">COM051010</subject> <!-- Programming / General -->
+                <subject scheme="bisac">COM051360</subject> <!-- Programming / AI -->
+                <subject scheme="bisac">COM051280</subject> <!-- Programming / Software Development -->
+            </subjects>
+
+            <contributors>
+                <contributor>
+                    <name>Purple Squirrel Media</name>
+                    <role>author</role>
+                </contributor>
+            </contributors>
+        </metadata>
+
+        <assets>
+            <asset type="full">
+                <file_name>Purple_Squirrel_Cookbook.epub</file_name>
+            </asset>
+        </assets>
+
+        <territories>
+            <territory>WW</territory> <!-- Worldwide -->
+        </territories>
+
+        <prices>
+            <price territory="US">9.99</price>
+            <price territory="GB">7.99</price>
+            <price territory="EU">8.99</price>
+        </prices>
+
+    </publication>
+</package>
