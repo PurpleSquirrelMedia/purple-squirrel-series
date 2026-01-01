@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purple Squirrel Series | Books for Modern Developers</title>
+    <meta name="description" content="A comprehensive book series covering AI development, quick references, and practical recipes for modern software developers.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --purple-primary: #6B2D8B;
+            --purple-light: #8B4DAB;
+            --purple-dark: #4A1D6B;
+            --bg-cream: #FFFEF8;
+            --text-dark: #1a1a1a;
+            --text-muted: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            background: var(--purple-primary);
+            color: white;
+            padding: 16px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-cream) 0%, #f5f0ff 100%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--purple-primary);
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            background: var(--purple-primary);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .hero-cta:hover {
+            background: var(--purple-dark);
+        }
+
+        /* Books Grid */
+        .books-section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 48px;
+            color: var(--purple-primary);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(107, 45, 139, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(107, 45, 139, 0.15);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .book-content {
+            padding: 24px;
+        }
+
+        .book-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--purple-primary);
+        }
+
+        .book-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .book-description {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .book-formats {
+            display: flex;
+            gap: 12px;
+        }
+
+        .format-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .format-btn.primary {
+            background: var(--purple-primary);
+            color: white;
+        }
+
+        .format-btn.primary:hover {
+            background: var(--purple-dark);
+        }
+
+        .format-btn.secondary {
+            background: #f0e6f5;
+            color: var(--purple-primary);
+        }
+
+        .format-btn.secondary:hover {
+            background: #e0d0ea;
+        }
+
+        /* Features */
+        .features {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--purple-primary);
+        }
+
+        .feature p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--purple-dark);
+            color: white;
+            padding: 48px 0;
+            text-align: center;
+        }
+
+        footer a {
+            color: white;
+            opacity: 0.8;
+        }
+
+        footer a:hover {
+            opacity: 1;
+        }
+
+        .footer-links {
+            margin-top: 16px;
+        }
+
+        .footer-links a {
+            margin: 0 16px;
+            text-decoration: none;
+        }
+
+        /* Code style */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f0e6f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">Purple Squirrel Media</div>
+            <a href="https://github.com/PurpleSquirrelMedia/purple-squirrel-series" class="nav-link">GitHub</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Purple Squirrel Series</h1>
+            <p class="subtitle">Books for Modern Developers</p>
+            <a href="#books" class="hero-cta">Browse the Collection</a>
+        </div>
+    </section>
+
+    <section id="books" class="books-section">
+        <div class="container">
+            <h2 class="section-title">The Collection</h2>
+            <div class="books-grid">
+                <!-- Playbook -->
+                <div class="book-card">
+                    <img src="covers/cover_playbook.jpg" alt="Purple Squirrel Playbook" class="book-cover">
+                    <div class="book-content">
+                        <h3 class="book-title">Purple Squirrel Playbook</h3>
+                        <p class="book-subtitle">Strategic Frameworks for Modern Development</p>
+                        <p class="book-description">Master AI-assisted development, startup strategy, and crypto/Web3 operations. The definitive guide for technical founders and senior developers.</p>
+                        <div class="book-formats">
+                            <a href="epub/Purple_Squirrel_Playbook.epub" class="format-btn primary" download>EPUB</a>
+                            <a href="pdf/Purple_Squirrel_Playbook.pdf" class="format-btn secondary" download>PDF</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nutshell -->
+                <div class="book-card">
+                    <img src="covers/cover_nutshell.jpg" alt="Purple Squirrel In a Nutshell" class="book-cover">
+                    <div class="book-content">
+                        <h3 class="book-title">Purple Squirrel In a Nutshell</h3>
+                        <p class="book-subtitle">A Desktop Quick Reference</p>
+                        <p class="book-description">Terminal commands, git workflows, API patterns, and language cheatsheets. Keep this open while you code.</p>
+                        <div class="book-formats">
+                            <a href="epub/Purple_Squirrel_Nutshell.epub" class="format-btn primary" download>EPUB</a>
+                            <a href="pdf/Purple_Squirrel_Nutshell.pdf" class="format-btn secondary" download>PDF</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cookbook -->
+                <div class="book-card">
+                    <img src="covers/cover_cookbook.jpg" alt="Purple Squirrel Cookbook" class="book-cover">
+                    <div class="book-content">
+                        <h3 class="book-title">Purple Squirrel Cookbook</h3>
+                        <p class="book-subtitle">Solutions & Patterns for Every Problem</p>
+                        <p class="book-description">Copy-paste recipes for Claude/AI, full-stack development, and DevOps. Problem → Solution, every time.</p>
+                        <div class="book-formats">
+                            <a href="epub/Purple_Squirrel_Cookbook.epub" class="format-btn primary" download>EPUB</a>
+                            <a href="pdf/Purple_Squirrel_Cookbook.pdf" class="format-btn secondary" download>PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Production-Ready</h3>
+                    <p>Code examples you can copy directly into your projects. No toy examples.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-First</h3>
+                    <p>Built for the Claude/AI development era. Modern patterns for modern tools.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multi-Format</h3>
+                    <p>EPUB for readers, PDF for print. Read anywhere, on any device.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔓</div>
+                    <h3>DRM-Free</h3>
+                    <p>No restrictions. Download, share, and read however you want.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p><strong>Purple Squirrel Media</strong></p>
+            <p style="opacity: 0.8; margin-top: 8px;">Engineering Excellence</p>
+            <div class="footer-links">
+                <a href="https://github.com/PurpleSquirrelMedia">GitHub</a>
+                <a href="https://github.com/PurpleSquirrelMedia/purple-squirrel-series">Source</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
