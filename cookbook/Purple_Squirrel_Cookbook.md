@@ -1,16 +1,32 @@
 # Purple Squirrel Cookbook
 
-## Solutions & Patterns for Every Problem
+**Solutions and Patterns for Every Problem**
 
----
+*By Purple Squirrel Media*
 
-# Part I: Claude/AI Recipes
+# Preface
 
-## Recipe 1.1: Structured Output Extraction
+A cookbook is different from other technical books. You don't read it cover to cover. You come to it with a specific problem, find the recipe that addresses it, and adapt the solution to your needs.
 
-**Problem:** You need Claude to return data in a specific format that your code can parse.
+Each recipe in this book follows a consistent pattern. We state the problem clearly, present a complete working solution, and explain the key decisions. Code samples are designed to be copied and modified. They prioritize clarity over cleverness and are production-ready rather than simplified for pedagogical purposes.
 
-**Solution:** Use explicit format instructions with examples.
+The recipes are organized into three parts. Part I covers Claude and AI integration patterns, from basic API calls to sophisticated RAG implementations. Part II provides full-stack recipes for authentication, real-time communication, file handling, and payments. Part III addresses DevOps concerns including containerization, CI/CD, monitoring, and database management.
+
+When you find a recipe that solves your problem, don't just copy the code. Read through the explanation to understand why it works. The patterns here are meant to be internalized and adapted, not just applied blindly.
+
+# Part I. Claude and AI Recipes
+
+Large language models have become essential tools in modern software development. This section provides practical recipes for integrating Claude into your applications, from simple API calls to complex multi-turn conversations and retrieval-augmented generation.
+
+## Chapter 1. Working with the Claude API
+
+The Claude API provides a straightforward interface for building AI-powered applications. These recipes cover the fundamental patterns you'll use in virtually every integration.
+
+### Structured Output Extraction
+
+Getting Claude to return data in a format your code can parse requires clear instructions and explicit format specification.
+
+The key insight is that Claude responds well to examples. Rather than describing the format abstractly, show Claude exactly what you want.
 
 ```python
 import anthropic
@@ -43,15 +59,13 @@ Return ONLY valid JSON, no explanation."""
     return json.loads(response.content[0].text)
 ```
 
-**Variation:** For complex schemas, provide a complete example in the prompt.
+The format block serves as both instruction and example. By including realistic sample data in the template, you anchor Claude's understanding of what each field should contain.
 
----
+For complex schemas with nested objects or arrays, provide a complete example response rather than trying to describe the structure in prose. Claude will match the pattern more reliably than it will follow abstract specifications.
 
-## Recipe 1.2: Multi-turn Conversation with Memory
+### Multi-turn Conversation with Memory
 
-**Problem:** Maintain context across multiple exchanges.
-
-**Solution:** Pass the full conversation history.
+A conversational interface requires maintaining context across multiple exchanges. The Claude API is stateless, so your application must manage the conversation history.
 
 ```python
 class Conversation:
@@ -85,20 +99,13 @@ class Conversation:
         self.messages = []
 ```
 
-**Usage:**
-```python
-conv = Conversation()
-conv.chat("How do I read a file in Python?")
-conv.chat("Now show me how to write to it")  # Remembers context
-```
+The message list grows with each exchange. When context becomes too large, you have several options. You can summarize earlier messages, remove the oldest exchanges, or start fresh with a summary of the conversation so far.
 
----
+For production applications, consider persisting the conversation history to a database. This allows users to resume conversations across sessions and provides valuable data for understanding how your application is being used.
 
-## Recipe 1.3: Tool Use / Function Calling
+### Tool Use and Function Calling
 
-**Problem:** Let Claude execute functions based on user requests.
-
-**Solution:** Define tools and handle tool calls.
+Tool use allows Claude to interact with external systems by requesting that your code execute specific functions. This pattern is essential for building agents that can take actions in the world.
 
 ```python
 import anthropic
@@ -122,7 +129,7 @@ tools = [
 ]
 
 def get_weather(location: str) -> dict:
-    # Actual API call would go here
+    # In production, this would call a weather API
     return {"temp": 72, "condition": "sunny"}
 
 def process_with_tools(user_input: str):
@@ -135,12 +142,10 @@ def process_with_tools(user_input: str):
         messages=[{"role": "user", "content": user_input}]
     )
 
-    # Check if Claude wants to use a tool
     for block in response.content:
         if block.type == "tool_use":
             if block.name == "get_weather":
                 result = get_weather(block.input["location"])
-                # Send result back to Claude
                 return continue_with_tool_result(
                     response, block.id, result
                 )
@@ -148,13 +153,17 @@ def process_with_tools(user_input: str):
     return response.content[0].text
 ```
 
----
+The tool schema tells Claude what functions are available and what parameters they accept. When Claude decides to use a tool, your code executes the actual function and sends the result back. This creates a loop where Claude can request multiple tool calls to accomplish complex tasks.
 
-## Recipe 1.4: RAG Implementation
+Write clear, specific descriptions for your tools. Claude uses these descriptions to decide when to use each tool, so vague descriptions lead to unreliable behavior.
 
-**Problem:** Answer questions using your own documents.
+## Chapter 2. Retrieval-Augmented Generation
 
-**Solution:** Retrieve relevant chunks, include in context.
+RAG allows Claude to answer questions using information from your own documents. The pattern involves retrieving relevant content and including it in the prompt context.
+
+### Basic RAG Implementation
+
+The core RAG pattern has three steps: embed your documents, find relevant chunks based on the query, and include those chunks in the prompt.
 
 ```python
 from sentence_transformers import SentenceTransformer
@@ -172,11 +181,8 @@ class SimpleRAG:
 
     def retrieve(self, query: str, top_k: int = 3) -> list[str]:
         query_embedding = self.encoder.encode([query])[0]
-
-        # Cosine similarity
         similarities = np.dot(self.embeddings, query_embedding)
         top_indices = np.argsort(similarities)[-top_k:][::-1]
-
         return [self.documents[i] for i in top_indices]
 
     def answer(self, question: str) -> str:
@@ -201,13 +207,13 @@ If the answer isn't in the context, say "I don't have that information."""
         return response.content[0].text
 ```
 
----
+This implementation uses cosine similarity to find the most relevant documents. For production use, you would store embeddings in a vector database like Pinecone, Weaviate, or pgvector rather than computing similarities in memory.
 
-## Recipe 1.5: Automated Code Review
+The instruction to acknowledge missing information is important. Without it, Claude may hallucinate answers that seem plausible but aren't grounded in your documents.
 
-**Problem:** Get AI feedback on code changes.
+### Automated Code Review
 
-**Solution:** Pass diff to Claude with review instructions.
+Claude excels at reviewing code changes. By providing the diff and clear review criteria, you can get consistent, thorough feedback on every pull request.
 
 ```python
 def review_code(diff: str, context: str = "") -> dict:
@@ -252,24 +258,29 @@ Return as JSON:
     return json.loads(response.content[0].text)
 ```
 
----
+The structured output format makes it easy to integrate code review into your CI pipeline. You can block merges on high-severity issues or post comments directly on pull requests.
 
-# Part II: Full-Stack Recipes
+Providing context about what the code is supposed to do improves review quality significantly. Claude can identify logic errors much more effectively when it understands the intent.
 
-## Recipe 2.1: JWT Authentication System
+# Part II. Full-Stack Recipes
 
-**Problem:** Implement secure user authentication.
+Modern applications require authentication, real-time communication, file handling, and often payment processing. These recipes provide production-ready patterns for these common requirements.
 
-**Solution:** JWT with refresh tokens.
+## Chapter 3. Authentication
+
+Authentication is a critical security concern. These recipes implement standard patterns using proven libraries.
+
+### JWT Authentication System
+
+JSON Web Tokens provide stateless authentication. This implementation includes both access tokens for short-lived authentication and refresh tokens for maintaining sessions.
 
 ```python
-# auth.py
 from datetime import datetime, timedelta
 from typing import Optional
 import jwt
 from passlib.context import CryptContext
 
-SECRET_KEY = "your-secret-key"  # Use env variable
+SECRET_KEY = "your-secret-key"  # Use environment variable
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRE = timedelta(days=7)
@@ -310,7 +321,10 @@ def verify_token(token: str) -> Optional[dict]:
         return None
 ```
 
-**FastAPI Integration:**
+The separation between access and refresh tokens is crucial. Access tokens are short-lived (15 minutes) and used for every authenticated request. Refresh tokens are long-lived (7 days) and used only to obtain new access tokens.
+
+For FastAPI integration, create a dependency that extracts and validates the token:
+
 ```python
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
@@ -330,23 +344,23 @@ async def get_current_user(credentials = Depends(security)):
     return payload["sub"]
 ```
 
----
+Store the secret key in environment variables, never in code. In production, consider using asymmetric keys (RS256) so you can verify tokens without access to the signing key.
 
-## Recipe 2.2: WebSocket Real-time Updates
+## Chapter 4. Real-Time Communication
 
-**Problem:** Push live updates to connected clients.
+Many applications need to push updates to clients as events occur. WebSockets provide bidirectional communication for this use case.
 
-**Solution:** WebSocket with connection management.
+### WebSocket Connection Management
+
+Managing multiple WebSocket connections requires careful attention to connection lifecycle and room-based broadcasting.
 
 ```python
-# websocket_manager.py
 from fastapi import WebSocket
 from typing import Dict, Set
 import json
 
 class ConnectionManager:
     def __init__(self):
-        # room_id -> set of websockets
         self.rooms: Dict[str, Set[WebSocket]] = {}
 
     async def connect(self, websocket: WebSocket, room_id: str):
@@ -372,7 +386,8 @@ class ConnectionManager:
 manager = ConnectionManager()
 ```
 
-**Endpoint:**
+The endpoint handles the WebSocket lifecycle and message routing:
+
 ```python
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
@@ -384,7 +399,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
     try:
         while True:
             data = await websocket.receive_json()
-            # Handle incoming message
             await manager.broadcast(room_id, {
                 "type": "message",
                 "data": data
@@ -393,7 +407,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
         manager.disconnect(websocket, room_id)
 ```
 
-**Client (JavaScript):**
+On the client side, connection is straightforward:
+
 ```javascript
 const ws = new WebSocket('ws://localhost:8000/ws/room123');
 
@@ -405,13 +420,15 @@ ws.onmessage = (event) => {
 ws.send(JSON.stringify({ message: 'Hello!' }));
 ```
 
----
+For production, add authentication by verifying a token before accepting the connection. You should also implement heartbeat pings to detect stale connections and automatic reconnection on the client side.
 
-## Recipe 2.3: File Upload with Processing
+## Chapter 5. File Handling
 
-**Problem:** Handle file uploads with validation and processing.
+File uploads introduce security and performance concerns. These patterns address validation, storage, and background processing.
 
-**Solution:** Chunked upload with background processing.
+### Secure File Upload with Processing
+
+Validate files on upload, store them safely, and process asynchronously:
 
 ```python
 from fastapi import FastAPI, UploadFile, BackgroundTasks
@@ -424,11 +441,9 @@ MAX_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_TYPES = {"image/jpeg", "image/png", "application/pdf"}
 
 async def save_upload(file: UploadFile) -> str:
-    # Validate content type
     if file.content_type not in ALLOWED_TYPES:
         raise ValueError(f"Invalid file type: {file.content_type}")
 
-    # Generate unique filename
     content = await file.read()
     if len(content) > MAX_SIZE:
         raise ValueError("File too large")
@@ -438,7 +453,6 @@ async def save_upload(file: UploadFile) -> str:
     filename = f"{file_hash}{ext}"
     filepath = UPLOAD_DIR / filename
 
-    # Save file
     async with aiofiles.open(filepath, 'wb') as f:
         await f.write(content)
 
@@ -463,63 +477,17 @@ async def upload_file(
         raise HTTPException(400, str(e))
 ```
 
----
+Using a content hash as the filename provides deduplication and prevents directory traversal attacks. The original filename is never used for storage.
 
-## Recipe 2.4: Full-Text Search
+Background tasks keep the upload response fast. For heavy processing, consider a proper task queue like Celery or RQ rather than FastAPI's built-in background tasks.
 
-**Problem:** Implement search across text content.
+## Chapter 6. Payments
 
-**Solution:** PostgreSQL full-text search (simple) or Elasticsearch (advanced).
+Payment integration requires careful attention to security and error handling. Stripe provides a well-designed API for both one-time payments and subscriptions.
 
-**PostgreSQL Approach:**
-```sql
--- Add search vector column
-ALTER TABLE articles ADD COLUMN search_vector tsvector;
+### Stripe Checkout Integration
 
--- Create index
-CREATE INDEX articles_search_idx ON articles USING GIN(search_vector);
-
--- Update trigger
-CREATE OR REPLACE FUNCTION articles_search_trigger() RETURNS trigger AS $$
-BEGIN
-  NEW.search_vector :=
-    setweight(to_tsvector('english', COALESCE(NEW.title, '')), 'A') ||
-    setweight(to_tsvector('english', COALESCE(NEW.content, '')), 'B');
-  RETURN NEW;
-END
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER articles_search_update
-  BEFORE INSERT OR UPDATE ON articles
-  FOR EACH ROW EXECUTE FUNCTION articles_search_trigger();
-```
-
-**Python Query:**
-```python
-from sqlalchemy import text
-
-def search_articles(query: str, limit: int = 20):
-    # Sanitize and format query
-    search_query = " & ".join(query.split())
-
-    result = db.execute(text("""
-        SELECT id, title, ts_rank(search_vector, query) as rank
-        FROM articles, plainto_tsquery('english', :query) query
-        WHERE search_vector @@ query
-        ORDER BY rank DESC
-        LIMIT :limit
-    """), {"query": query, "limit": limit})
-
-    return result.fetchall()
-```
-
----
-
-## Recipe 2.5: Stripe Payment Integration
-
-**Problem:** Accept payments with Stripe.
-
-**Solution:** Checkout Sessions for one-time, Subscriptions for recurring.
+Stripe Checkout handles the payment form, reducing PCI compliance burden:
 
 ```python
 import stripe
@@ -566,19 +534,23 @@ async def stripe_webhook(request: Request):
     return {"status": "ok"}
 ```
 
----
+Always verify webhook signatures. Without verification, anyone could send fake events to your webhook endpoint.
 
-# Part III: DevOps/Infrastructure
+The `client_reference_id` links the Stripe session to your user. This is essential for knowing which account to activate after successful payment.
 
-## Recipe 3.1: Docker Multi-Stage Build
+# Part III. DevOps and Infrastructure
 
-**Problem:** Create minimal production Docker images.
+Production applications need containerization, automated deployment, monitoring, and database management. These recipes cover the essential patterns.
 
-**Solution:** Multi-stage builds to separate build and runtime.
+## Chapter 7. Containerization
+
+Docker containers provide consistent environments from development through production.
+
+### Multi-Stage Docker Build
+
+Multi-stage builds separate the build environment from the runtime environment, producing smaller, more secure images:
 
 ```dockerfile
-# Dockerfile
-
 # Stage 1: Build
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -593,7 +565,6 @@ RUN npm run build
 FROM node:20-alpine AS production
 WORKDIR /app
 
-# Non-root user
 RUN addgroup -g 1001 -S app && \
     adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G app app
 
@@ -606,7 +577,12 @@ EXPOSE 3000
 CMD ["node", "dist/index.js"]
 ```
 
-**Python Variant:**
+The build stage includes all development dependencies. The production stage contains only runtime dependencies and compiled code.
+
+Running as a non-root user limits the damage from container escape vulnerabilities. The minimal Alpine base image reduces attack surface.
+
+For Python applications, the pattern is similar:
+
 ```dockerfile
 FROM python:3.11-slim AS builder
 WORKDIR /app
@@ -623,16 +599,15 @@ COPY . .
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0"]
 ```
 
----
+## Chapter 8. CI/CD Pipelines
 
-## Recipe 3.2: GitHub Actions CI/CD
+Automated testing and deployment reduces errors and accelerates delivery.
 
-**Problem:** Automate testing and deployment.
+### GitHub Actions Workflow
 
-**Solution:** Workflow with test, build, and deploy stages.
+This workflow runs tests on every push, builds a container image, and deploys on merge to main:
 
 ```yaml
-# .github/workflows/deploy.yml
 name: Deploy
 
 on:
@@ -703,76 +678,22 @@ jobs:
             -d '{"image": "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"}'
 ```
 
----
+The `needs` clauses ensure stages run in order. Pull requests run tests but skip build and deploy.
 
-## Recipe 3.3: Railway/Vercel Deployment
+Using the git SHA as the image tag creates immutable deployments. You can always identify exactly which commit is running in production.
 
-**Problem:** Deploy without managing infrastructure.
+## Chapter 9. Monitoring
 
-**Solution:** Platform-specific configurations.
+You can't fix problems you don't know about. Monitoring provides visibility into application health and performance.
 
-**Vercel (Next.js):**
-```json
-// vercel.json
-{
-  "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "DATABASE_URL": "@database-url"
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
-      ]
-    }
-  ]
-}
-```
+### Prometheus Metrics
 
-**Railway (Docker):**
-```toml
-# railway.toml
-[build]
-builder = "dockerfile"
+Expose application metrics in Prometheus format:
 
-[deploy]
-healthcheckPath = "/health"
-healthcheckTimeout = 30
-restartPolicyType = "on-failure"
-restartPolicyMaxRetries = 3
-```
-
-**Railway with Nixpacks:**
-```json
-// nixpacks.json (alternative to Dockerfile)
-{
-  "providers": ["python"],
-  "phases": {
-    "setup": {
-      "nixPkgs": ["python311", "gcc"]
-    },
-    "install": {
-      "cmds": ["pip install -r requirements.txt"]
-    }
-  },
-  "start": "uvicorn main:app --host 0.0.0.0 --port $PORT"
-}
-```
-
----
-
-## Recipe 3.4: Prometheus + Grafana Monitoring
-
-**Problem:** Monitor application health and performance.
-
-**Solution:** Expose metrics, collect with Prometheus, visualize in Grafana.
-
-**Python Metrics Endpoint:**
 ```python
 from prometheus_client import Counter, Histogram, generate_latest
 from fastapi import FastAPI, Response
+import time
 
 REQUEST_COUNT = Counter(
     'http_requests_total',
@@ -813,28 +734,9 @@ async def metrics():
     )
 ```
 
-**Docker Compose Stack:**
-```yaml
-# docker-compose.monitoring.yml
-services:
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
+Prometheus scrapes the `/metrics` endpoint periodically. Configure scraping in `prometheus.yml`:
 
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-```
-
-**Prometheus Config:**
 ```yaml
-# prometheus.yml
 scrape_configs:
   - job_name: 'app'
     static_configs:
@@ -842,23 +744,17 @@ scrape_configs:
     metrics_path: '/metrics'
 ```
 
----
+Use Grafana to visualize metrics and create alerts. The combination of Prometheus for collection and Grafana for visualization is the standard observability stack.
 
-## Recipe 3.5: Database Migrations
+## Chapter 10. Database Management
 
-**Problem:** Manage database schema changes safely.
+Schema changes are inevitable. Managing them safely requires version-controlled migrations.
 
-**Solution:** Version-controlled migrations with Alembic (Python) or Prisma (TypeScript).
+### Alembic Migrations
 
-**Alembic Setup:**
-```bash
-pip install alembic
-alembic init migrations
-```
+Alembic tracks schema changes as versioned migration scripts:
 
-**Migration Script:**
 ```python
-# migrations/versions/001_create_users.py
 """create users table
 
 Revision ID: 001
@@ -885,7 +781,8 @@ def downgrade():
     op.drop_table('users')
 ```
 
-**Run Migrations:**
+Run migrations with the Alembic CLI:
+
 ```bash
 # Create new migration
 alembic revision -m "add posts table"
@@ -900,9 +797,11 @@ alembic downgrade -1
 alembic current
 ```
 
-**Prisma Variant (TypeScript):**
+Every migration has both `upgrade` and `downgrade` functions. Test downgrades in development because you may need them in production emergencies.
+
+For TypeScript projects, Prisma provides a more integrated experience:
+
 ```prisma
-// schema.prisma
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -921,14 +820,10 @@ model Post {
 ```
 
 ```bash
-# Generate migration
 npx prisma migrate dev --name add_posts
-
-# Apply to production
 npx prisma migrate deploy
 ```
 
----
+Prisma generates migrations automatically from schema changes, reducing the manual work required.
 
 *Purple Squirrel Media*
-*Engineering Excellence*
